@@ -1,0 +1,30 @@
+@HotelAPI_HostAddress = http://localhost:5202
+@ProductId = 1
+@UserId = 1
+@ReservationId = 1
+
+### List with X-Total-Count (apply the SQL script first)
+GET {{HotelAPI_HostAddress}}/api/products?page=1&pageSize=10
+Accept: application/json
+
+### Set an actual available quantity manually before reserving (do not invent stock)
+# PATCH {{HotelAPI_HostAddress}}/api/products/{{ProductId}}
+# Content-Type: application/json
+#
+# { "availableQuantity": 10 }
+
+### Reserve: 201; missing Product/User: 404; invalid quantity/insufficient stock: 400
+POST {{HotelAPI_HostAddress}}/api/productreservations
+Content-Type: application/json
+
+{ "productId": {{ProductId}}, "userId": {{UserId}}, "quantity": 1 }
+
+### Read reservation
+GET {{HotelAPI_HostAddress}}/api/productreservations/{{ReservationId}}
+
+### Cancel: 204; no active reservation (missing or already cancelled): 404
+POST {{HotelAPI_HostAddress}}/api/productreservations/{{ReservationId}}/cancel
+
+### Carts and order items require an explicit unused ID (non-Identity keys).
+# POST /api/carts: { "idCart": 100, "userId": 1 }
+# POST /api/orderitems: { "idOrderItem": 100, "orderId": 1, "productId": 1, "quantity": 1 }
